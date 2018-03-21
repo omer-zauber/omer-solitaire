@@ -2,11 +2,14 @@ import React, { Component } from 'react';
 import Card from './Card';
 import Pile from './Pile';
 import Foundation from './Foundation';
+import ReserveDeck from './ReserveDeck';
 import Deck from '../utils/Deck';
 import shuffle from '../utils/shuffle';
 import dealPiles from '../utils/dealPiles';
 
-//LINE 68
+
+/// when passing cards to foundations, check if length of each is 13. if so alert WIN
+/// add restart button
 
 export default class App extends Component {
 	state = {
@@ -23,17 +26,17 @@ export default class App extends Component {
 		this.setState(prevState => ({ ...dealPiles({ ...prevState }) }));
 	}
 	// [ CARD CLICK ]
-	handleCardPicked = (card, pileIndex) => {
-		this.setState(() => ({ clickedCard: { card, pileIndex } }));
+	handleCardPicked = (card, index, isPile = true) => {
+		this.setState(() => ({ clickedCard: { card, index, isPile } }));
 	};
 
-	// [ PILE CLICK ]
-	handleCardMoveToPile = toPileIndex => {
+	// [ PILE PASS ]
+	handleCardMoveToPile = async toPileIndex => {
 		if (this.state.clickedCard === null) return;
-		const { card: originCard, pileIndex: fromPileIndex } = this.state.clickedCard;
+		const { card: originCard, index: fromPileIndex } = this.state.clickedCard;
 		if (this.canMoveCardToPile(originCard, toPileIndex)) {
-			this.moveCardToPile(fromPileIndex, originCard, toPileIndex);
-			this.turnNewCards(fromPileIndex);
+			await this.moveCardToPile(fromPileIndex, originCard, toPileIndex);
+			if (this.state.clickedCard.isPile) this.turnNewCards(fromPileIndex);
 		}
 		this.setState(() => ({ clickedCard: null }));
 	};
@@ -50,25 +53,96 @@ export default class App extends Component {
 	};
 
 	moveCardToPile = (fromPileIndex, card, pileNo) => {
-		const fromPile = this.state.piles[fromPileIndex].turnedUp;
+		let fromPile;
+		if (this.state.clickedCard.isPile) fromPile = this.state.piles[fromPileIndex].turnedUp;
+		else if (this.state.clickedCard.index === 'open') fromPile = this.state.openCards;
+		else fromPile = this.state.foundations[fromPileIndex];
 		const cardIndex = fromPile.indexOf(card);
 		if (cardIndex === -1) return;
 		const cardsToMove = fromPile.length - cardIndex;
-		this.setState(prevState => {
-			const piles = prevState.piles;
-			piles[pileNo].turnedUp = piles[pileNo].turnedUp.concat(
-				piles[fromPileIndex].turnedUp.splice(-cardsToMove, cardsToMove)
-			);
-
-			return { piles };
+		this.setState(({ piles, foundations }) => {
+			let pulledCards;
+			if (this.state.clickedCard.isPile)
+				pulledCards = piles[fromPileIndex].turnedUp.splice(-cardsToMove, cardsToMove);
+			else if (this.state.clickedCard.index === 'open') pulledCards = this.state.openCards.pop();
+			else pulledCards = foundations[fromPileIndex].pop();
+			piles[pileNo].turnedUp = piles[pileNo].turnedUp.concat(pulledCards);
+			return { piles, foundations };
 		});
 	};
 
-	//    SETSTATE
 	turnNewCards = fromPileIndex => {
-		// const pile = this.state.piles[fromPileIndex];
-		// if (pile.faceDown)
-		// 	if (pile.faceDown.length !== 0 && pile.turnedUp.length === 0) pile.turnedUp.push(pile.faceDown.pop());
+		const pile = this.state.piles[fromPileIndex];
+		if (pile.faceDown) {
+			if (pile.faceDown.length !== 0 && pile.turnedUp.length === 0) {
+				this.setState(({ piles }) => {
+					pile.turnedUp.push(pile.faceDown.pop());
+					piles[fromPileIndex] = pile;
+					return { piles };
+				});
+			}
+		}
+	};
+
+	// [ FOUNDATION PASS ]
+
+	handleCardMoveToFoundation = async toFoundationIndex => {
+		if (this.state.clickedCard === null) return;
+		const { card: originCard, index: fromPileIndex } = this.state.clickedCard;
+		if (this.canMoveCardToFoundation(originCard, toFoundationIndex)) {
+			await this.moveCardToFoundation(fromPileIndex, originCard, toFoundationIndex); //
+			if (fromPileIndex !== 'open') this.turnNewCards(fromPileIndex);
+		}
+
+		this.setState(() => ({ clickedCard: null }));
+	};
+
+	canMoveCardToFoundation = (card, toFoundationIndex) => {
+		const foundation = this.state.foundations[toFoundationIndex];
+		if (foundation.length === 0)
+			if (card.value === 1) return true;
+			else return false;
+		const targetCard = foundation[foundation.length - 1];
+		return card.suit === targetCard.suit && targetCard.value + 1 === card.value;
+	};
+
+	moveCardToFoundation = (fromPileIndex, card, toFoundationIndex) => {
+		const fromPile = fromPileIndex === 'open' ? this.state.openCards : this.state.piles[fromPileIndex].turnedUp;
+		const cardIndex = fromPile.indexOf(card);
+		if (cardIndex === -1) return;
+		const cardsToMove = fromPile.length - cardIndex;
+
+		this.setState(({ piles, foundations ,openCards}) => {
+			if (fromPileIndex==='open') foundations[toFoundationIndex] = foundations[toFoundationIndex].concat(openCards.splice(-cardsToMove, cardsToMove));
+			else foundations[toFoundationIndex] = foundations[toFoundationIndex].concat(piles[fromPileIndex].turnedUp.splice(-cardsToMove, cardsToMove));
+			return { foundations, piles,openCards };
+		});
+	};
+
+	// [ RESERVE DECK ]
+
+	handleReserveDeckDraw = async () => {
+		await this.clearOpenCards();
+		if (this.state.reserveDeck.length === 0) await this.refreshReserveDeck();
+		this.drawNewCards();
+	};
+
+	clearOpenCards = () => {
+		this.setState(({ wasteDeck, openCards }) => {
+			return { wasteDeck: [...openCards, ...wasteDeck], openCards: [] };
+		});
+	};
+
+	refreshReserveDeck = () => {
+		this.setState(({ wasteDeck }) => {
+			return { reserveDeck: wasteDeck, wasteDeck: [] };
+		});
+	};
+
+	drawNewCards = () => {
+		const reserveDeck = this.state.reserveDeck;
+		const openCards = reserveDeck.splice(-3, 3);
+		this.setState(() => ({ reserveDeck, openCards }));
 	};
 
 	// [ RENDER ]
@@ -76,17 +150,22 @@ export default class App extends Component {
 	render() {
 		return (
 			<div>
-				<div style={{ display: 'flex' }}>
-					{this.state.clickedCard && (
-						<div>
-							<Card card={this.state.clickedCard.card} /> from pile {this.state.clickedCard.pileIndex + 1}
-						</div>
-					)}
-				</div>
-				<div>reserve deck cards:{this.state.reserveDeck.length}</div>
+				<ReserveDeck
+					reserveDeck={this.state.reserveDeck}
+					openCards={this.state.openCards}
+					wasteDeck={this.state.wasteDeck}
+					handleReserveDeckDraw={this.handleReserveDeckDraw}
+					handleCardPicked={this.handleCardPicked}
+				/>
 				<div style={{ display: 'flex' }}>
 					{this.state.foundations.map((foundation, index) => (
-						<Foundation key={index} index={index} cards={foundation} />
+						<Foundation
+							key={index}
+							index={index}
+							cards={foundation}
+							handleCardPicked={this.handleCardPicked}
+							handleCardMoveToFoundation={this.handleCardMoveToFoundation}
+						/>
 					))}
 				</div>
 				<div style={{ display: 'flex' }}>
@@ -99,6 +178,15 @@ export default class App extends Component {
 							handleCardMoveToPile={this.handleCardMoveToPile}
 						/>
 					))}
+				</div>
+				<div style={{ display: 'flex' }}>
+					{this.state.clickedCard && (
+						<div>
+							Chosen Card: <Card card={this.state.clickedCard.card} /> from{' '}
+							{this.state.clickedCard.isFoundation ? 'foundation' : 'pile'}{' '}
+							{this.state.clickedCard.index + 1}
+						</div>
+					)}
 				</div>
 			</div>
 		);

@@ -10,12 +10,26 @@ export default props => (
 					<li>Empty Pile</li>
 				) : (
 					props.cards.map((card, index) => (
-						<li key={index}>
+						<li
+							key={index}
+							onClick={event => {
+								props.handleCardPicked(card, props.index, false);
+							}}
+						>
 							<Card card={card} />
 						</li>
 					))
 				)}
 			</ul>
+			<button
+				onClick={event => {
+					props.handleCardMoveToFoundation(props.index);
+				}}
+			>
+				Pass Here
+			</button>
 		</div>
 	</div>
 );
+
+
