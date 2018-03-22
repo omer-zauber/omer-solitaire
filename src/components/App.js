@@ -7,7 +7,6 @@ import Deck from '../utils/Deck';
 import shuffle from '../utils/shuffle';
 import dealPiles from '../utils/dealPiles';
 
-
 /// when passing cards to foundations, check if length of each is 13. if so alert WIN
 /// add restart button
 
@@ -112,10 +111,16 @@ export default class App extends Component {
 		if (cardIndex === -1) return;
 		const cardsToMove = fromPile.length - cardIndex;
 
-		this.setState(({ piles, foundations ,openCards}) => {
-			if (fromPileIndex==='open') foundations[toFoundationIndex] = foundations[toFoundationIndex].concat(openCards.splice(-cardsToMove, cardsToMove));
-			else foundations[toFoundationIndex] = foundations[toFoundationIndex].concat(piles[fromPileIndex].turnedUp.splice(-cardsToMove, cardsToMove));
-			return { foundations, piles,openCards };
+		this.setState(({ piles, foundations, openCards }) => {
+			if (fromPileIndex === 'open')
+				foundations[toFoundationIndex] = foundations[toFoundationIndex].concat(
+					openCards.splice(-cardsToMove, cardsToMove)
+				);
+			else
+				foundations[toFoundationIndex] = foundations[toFoundationIndex].concat(
+					piles[fromPileIndex].turnedUp.splice(-cardsToMove, cardsToMove)
+				);
+			return { foundations, piles, openCards };
 		});
 	};
 
@@ -123,7 +128,7 @@ export default class App extends Component {
 
 	handleReserveDeckDraw = async () => {
 		await this.clearOpenCards();
-		if (this.state.reserveDeck.length === 0) await this.refreshReserveDeck();
+		if (this.state.reserveDeck.length < 3) await this.refreshReserveDeck();
 		this.drawNewCards();
 	};
 
@@ -134,8 +139,8 @@ export default class App extends Component {
 	};
 
 	refreshReserveDeck = () => {
-		this.setState(({ wasteDeck }) => {
-			return { reserveDeck: wasteDeck, wasteDeck: [] };
+		this.setState(({ wasteDeck, reserveDeck }) => {
+			return { reserveDeck: [...wasteDeck, ...reserveDeck], wasteDeck: [] };
 		});
 	};
 
