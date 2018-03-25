@@ -1,5 +1,13 @@
 ul {
+  position: relative;
   color: darkslategrey;
   margin-bottom: 25px;
-  margin-right: 25px
+  margin-right: 25px;
+  list-style-type: none;
+}
+
+li {
+
+  width: 120px;
+  max-width: 120px;
 }

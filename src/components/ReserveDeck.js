@@ -1,37 +1,79 @@
-import React from 'react';
-import Card from './Card';
+import React from "react";
+import cardBack from "../images/cardback.png";
 
-const ReserveDeck = props => (
-	<div>
-		<div>
-			Reserve deck cards: {props.reserveDeck.length} <button onClick={props.handleReserveDeckDraw}>draw</button>
-		</div>
-		<div>
-			Open Cards:
-			<ul>
-				{props.openCards.length === 0 ? (
-					<li>Empty Pile</li>
-				) : (
-					props.openCards.map((card, index) => (
-						<li
-							key={index}
-							onClick={
-								index === props.openCards.length - 1
-									? event => {
-											props.handleCardPicked(card, 'open', false);
-									  }
-									: null
-							}
-						>
-							<Card card={card} />
-						</li>
-					))
-				)}
-			</ul>
-		</div>
-		<div>Waste:{props.wasteDeck.length} </div>
-	</div>
-);
+const ReserveDeck = props =>
+  <div style={{ display: "flex" }}>
+    <div>
+      <button onClick={props.handleReserveDeckDraw}>draw</button>
+      <ul>
+        {props.reserveDeck.map((card, index) =>
+          <li key={index}>
+            <img
+              src={cardBack}
+              alt="unturned card"
+              style={{
+                zIndex: index,
+                position: "absolute",
+                top: (card.value - 6.5) / 4,
+                left: index * 2,
+                width: "120px"
+              }}
+            />
+          </li>
+        )}
+      </ul>
+    </div>
+    <div>
+      Open Cards:
+      <ul>
+        {props.openCards.length === 0
+          ? <li>Empty Pile</li>
+          : props.openCards.map((card, index) =>
+              <li
+                key={index}
+                onClick={
+                  index === props.openCards.length - 1
+                    ? event => {
+                        props.handleCardPicked(card, "open", false);
+                      }
+                    : null
+                }
+              >
+                <img
+                  src={card.img}
+                  alt={card.value + card.suit}
+                  style={{
+                    zIndex: index,
+                    position: "absolute",
+                    top: (card.value - 6.5) / 4,
+                    left: index * 25 + (card.value - 6.5) / 4,
+                    maxWidth: "120px"
+                  }}
+                />
+              </li>
+            )}
+      </ul>
+    </div>
+    <div>
+      <ul>
+        {props.wasteDeck.map((card, index) =>
+          <li key={index}>
+            <img
+              src={cardBack}
+              alt="unturned card"
+              style={{
+                zIndex: index,
+                position: "absolute",
+                top: (card.value - 6.5) / 4,
+                left: index * 2,
+                width: "120px"
+              }}
+            />
+          </li>
+        )}
+      </ul>
+    </div>
+  </div>;
 
 export default ReserveDeck;
 
