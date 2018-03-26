@@ -170,26 +170,35 @@ export default class App extends Component {
 
   render() {
     return (
-      <div>
-        <ReserveDeck
-          reserveDeck={this.state.reserveDeck}
-          openCards={this.state.openCards}
-          wasteDeck={this.state.wasteDeck}
-          handleReserveDeckDraw={this.handleReserveDeckDraw}
-          handleCardPicked={this.handleCardPicked}
-        />
-        <div style={{ display: "flex" }}>
-          {this.state.foundations.map((foundation, index) =>
-            <Foundation
-              key={index}
-              index={index}
-              cards={foundation}
-              handleCardPicked={this.handleCardPicked}
-              handleCardMoveToFoundation={this.handleCardMoveToFoundation}
-            />
-          )}
+      <div
+        className="container"
+        style={{
+          margin: "auto",
+          width: "75%",
+          padding: "10px"
+        }}
+      >
+        <div style={{ display: "flex", padding: "70px", height:'150px' }}>
+          <ReserveDeck
+            reserveDeck={this.state.reserveDeck}
+            openCards={this.state.openCards}
+            wasteDeck={this.state.wasteDeck}
+            handleReserveDeckDraw={this.handleReserveDeckDraw}
+            handleCardPicked={this.handleCardPicked}
+          />
+          <div style={{ display: "flex" }}>
+            {this.state.foundations.map((foundation, index) =>
+              <Foundation
+                key={index}
+                index={index}
+                cards={foundation}
+                handleCardPicked={this.handleCardPicked}
+                handleCardMoveToFoundation={this.handleCardMoveToFoundation}
+              />
+            )}
+          </div>
         </div>
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", padding: "70px" }}>
           {this.state.piles.map((pile, index) =>
             <Pile
               key={index}
@@ -200,7 +209,7 @@ export default class App extends Component {
             />
           )}
         </div>
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", padding: "70px" }}>
           {this.state.clickedCard &&
             <div>
               Chosen Card: <Card card={this.state.clickedCard.card} /> from{" "}

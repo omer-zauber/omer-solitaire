@@ -1,3 +1,10 @@
+body  {
+  background-image: url('./images/table-background.png');
+  background-repeat: no-repeat;
+  background-size: 100%;
+}
+
+
 ul {
   position: relative;
   color: darkslategrey;

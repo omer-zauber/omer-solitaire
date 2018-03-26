@@ -1,33 +1,44 @@
 import React from "react";
 import cardBack from "../images/cardback.png";
+import stackPlacement from "../images/stackPlacement.png";
 
 const ReserveDeck = props =>
-  <div style={{ display: "flex" }}>
+  <div style={{ display: "flex", width: 540 }}>
     <div>
-      <button onClick={props.handleReserveDeckDraw}>draw</button>
-      <ul>
-        {props.reserveDeck.map((card, index) =>
-          <li key={index}>
-            <img
-              src={cardBack}
-              alt="unturned card"
-              style={{
-                zIndex: index,
-                position: "absolute",
-                top: (card.value - 6.5) / 4,
-                left: index * 2,
-                width: "120px"
-              }}
-            />
-          </li>
-        )}
+      <ul onClick={props.handleReserveDeckDraw}>
+        {props.reserveDeck.length === 0
+          ? <li>
+              <img
+                src={stackPlacement}
+                alt="empty stack"
+                style={{
+                  position: "absolute",
+                  width: "120px",
+                  left:0
+                }}
+              />
+            </li>
+          : props.reserveDeck.map((card, index) =>
+              <li key={index}>
+                <img
+                  src={cardBack}
+                  alt="unturned card"
+                  style={{
+                    zIndex: index,
+                    position: "absolute",
+                    top: (card.value - 6.5) / 4,
+                    left: index * 2,
+                    width: "120px"
+                  }}
+                />
+              </li>
+            )}
       </ul>
     </div>
     <div>
-      Open Cards:
       <ul>
         {props.openCards.length === 0
-          ? <li>Empty Pile</li>
+          ? <li></li>
           : props.openCards.map((card, index) =>
               <li
                 key={index}

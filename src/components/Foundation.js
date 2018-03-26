@@ -1,14 +1,32 @@
 import React from "react";
+import stackPlacement from "../images/stackPlacement.png";
 
 export default props =>
   <div>
     <div>
       Foundation {props.index + 1}
     </div>
+    <button
+        onClick={event => {
+          props.handleCardMoveToFoundation(props.index);
+        }}
+      >
+        Pass Here
+      </button>
     <div>
       <ul>
         {props.cards.length === 0
-          ? <li>Empty Pile</li>
+          ? <li>
+              <img
+                src={stackPlacement}
+                alt="empty stack"
+                style={{
+                  position: "absolute",
+                  width: "120px",
+                  left:0
+                }}
+              />
+            </li>
           : props.cards.map((card, index) =>
               <li
                 key={index}
@@ -22,7 +40,7 @@ export default props =>
                   style={{
                     zIndex: index,
                     position: "absolute",
-                    top: index * 25,
+                    top: (card.value - 6.5) / 2,
                     left: (card.value - 6.5) / 2,
                     maxWidth: "120px"
                   }}
@@ -30,12 +48,6 @@ export default props =>
               </li>
             )}
       </ul>
-      <button
-        onClick={event => {
-          props.handleCardMoveToFoundation(props.index);
-        }}
-      >
-        Pass Here
-      </button>
+
     </div>
   </div>;

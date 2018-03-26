@@ -1,5 +1,6 @@
 import React from "react";
 import cardBack from "../images/cardback.png";
+import stackPlacement from "../images/stackPlacement.png";
 
 export default props =>
   <div>
@@ -15,9 +16,7 @@ export default props =>
         Pass Here
       </button>
       <ul>
-        {props.cards.faceDown.length === 0
-          ? ""
-          : props.cards.faceDown.map((card, index) =>
+        {props.cards.faceDown.map((card, index) =>
               <li key={index}>
                 <img
                   src={cardBack}
@@ -33,7 +32,17 @@ export default props =>
               </li>
             )}
         {props.cards.turnedUp.length === 0
-          ? <li>Empty Pile</li>
+          ? <li>
+              <img
+                src={stackPlacement}
+                alt="empty stack"
+                style={{
+                  position: "absolute",
+                  width: "120px",
+                  left:0
+                }}
+              />
+            </li>
           : props.cards.turnedUp.map((card, index) =>
               <li
                 key={index}
